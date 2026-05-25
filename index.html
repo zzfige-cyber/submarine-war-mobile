@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>潜艇大战 - 深海猎手</title>
     <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
     <!-- 自定义字体 -->
     <style>
         @font-face {
@@ -229,25 +229,21 @@
             height: auto;
         }
 
-        #btnGlobalLeaderboard {
-            width: 227px;
-            height: auto;
-            position: absolute;
-            left: 36px;
-            top: 75px;
-        }
+
 
         /* 通关页面右侧按钮 */
         .victorySideButtons {
             position: absolute;
-            top: 175px;
-            left: 1665px;
+            top: 272px;
+            left: 1669px;
             width: 274px;
             height: 152px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             z-index: 300;
+            transform: scale(1.3); /* 放大30% */
+            transform-origin: right center; /* 以右侧边缘为圆心 */
             display: none; /* 默认隐藏，通关时显示 */
         }
 
@@ -269,13 +265,7 @@
             height: auto;
         }
 
-        #btnVictoryLeaderboard {
-            width: 227px;
-            height: auto;
-            position: absolute;
-            left: 36px;
-            top: 75px;
-        }
+
 
         /* 剩余技能点数值 - 定位到截图上的位置 */
         .skillPointsValue {
@@ -1264,246 +1254,6 @@
             transform: scale(1.05);
         }
         
-        /* 排行榜气泡样式 - 新设计 */
-        .leaderboardBubble {
-            position: absolute;
-            top: 444px;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 200;
-            display: none;
-            width: 504px;
-            height: 264px;
-        }
-        
-        .leaderboardBubble.active {
-            display: block;
-            animation: leaderboardBubblePop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        
-        @keyframes leaderboardBubblePop {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-        
-        .leaderboardBubbleBg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        .leaderboardBubbleContent {
-            position: absolute;
-            top: 23px;
-            left: 11px;
-            width: 474px;
-            height: 224px;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 36px 44px 80px 76px;
-        }
-        
-        .leaderboardBubbleTitle {
-            font-size: 44px;
-            color: #000000;
-            font-family: "HYQiHeiY3", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
-            line-height: 22px;
-            letter-spacing: -2.22px;
-            margin: 0 0 0 13px;
-            font-weight: bold;
-            left: 68px;
-        }
-        
-        .playerNameInput {
-            position: absolute;
-            left: 82px;
-            top: 89px;
-            width: 332px;
-            height: 54px;
-            padding: 0 15px;
-            font-size: 24px;
-            border: 2px solid #ccc;
-            background: #f0f0f0;
-            outline: none;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        
-        .playerNameInput:focus {
-            border-color: #b5fe12;
-        }
-        
-        .leaderboardUploadBtn {
-            position: absolute;
-            left: 97px;
-            width: 286px;
-            height: 107px;
-            top: 199px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            z-index: 3;
-        }
-        
-        .leaderboardUploadBtn:hover {
-            transform: scale(1.05);
-        }
-        
-        .leaderboardBubbleBtn.skipBtn {
-            background: #f0f0f0;
-            color: #666;
-        }
-        
-        .leaderboardBubbleBtn.skipBtn:hover {
-            background: #e0e0e0;
-            transform: scale(1.05);
-        }
-        
-        /* 排行榜弹窗样式 - 新设计 */
-        .leaderboardModal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1100;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .leaderboardModal.active {
-            display: flex;
-            animation: leaderboardModalFadeIn 0.3s ease;
-        }
-        
-        @keyframes leaderboardModalFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .leaderboardModalContent {
-            position: relative;
-            width: 1666px;
-            height: 932px;
-            background-image: url('assets/figma_image/screenshot_619_533.webp');
-            background-position: center;
-            background-size: contain;
-            background-repeat: no-repeat;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 150px 126px 128px 156px;
-        }
-        
-        .leaderboardList {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 1286px;
-            position: absolute;
-            top: 194px;
-            gap: 19px;
-        }
-        
-        .leaderboardItem {
-            display: flex;
-            align-items: center;
-            width: 1286px;
-            height: 37px;
-            padding: 3px 66px 4px 24px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            font-family: "HYQiHeiY3", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
-            font-size: 36px;
-            color: #000000;
-        }
-        
-        /* NO.1-NO.10 统一使用同一个背景素材 */
-        .leaderboardItem.rank1,
-        .leaderboardItem.rank2,
-        .leaderboardItem.rank3,
-        .leaderboardItem.rank4,
-        .leaderboardItem.rank5,
-        .leaderboardItem.rank6,
-        .leaderboardItem.rank7,
-        .leaderboardItem.rank8,
-        .leaderboardItem.rank9,
-        .leaderboardItem.rank10 {
-            background-image: url('assets/figma_image/screenshot_605_446.webp');
-        }
-        
-        /* 普通玩家行文字颜色 */
-        .leaderboardItem {
-            color: #636363;
-        }
-        
-        /* 高亮玩家行 - 使用特殊背景图，文字颜色为黄色 */
-        .leaderboardItem.highlight {
-            background-image: url('assets/figma_image/screenshot_605_477.webp') !important;
-            color: #FFF90D;
-        }
-        
-        .leaderboardItemRank {
-            width: 124px;
-            line-height: 29px;
-            letter-spacing: -1.8px;
-        }
-        
-        .leaderboardItemName {
-            margin-left: 150px;
-            width: 188px;
-            line-height: 29px;
-            letter-spacing: -1.8px;
-        }
-        
-        .leaderboardItemTime {
-            margin-left: 249px;
-            width: 164px;
-            line-height: 29px;
-            letter-spacing: 0;
-            font-size: 0;
-            display: flex;
-            align-items: center;
-        }
-        
-        .leaderboardItemTime .timeValue {
-            line-height: 29px;
-            letter-spacing: -1.8px;
-            font-size: 36px;
-        }
-        
-        .leaderboardItemTime .timeUnit {
-            line-height: 29px;
-            letter-spacing: -1.16px;
-            font-size: 23px;
-        }
-        
-        .leaderboardItemCombo {
-            margin-left: 162px;
-            width: 160px;
-            line-height: 29px;
-            letter-spacing: -1.8px;
-        }
-        
-        .leaderboardBackBtn {
-            position: absolute;
-            top: 820px;
-            left: 626px;
-            width: 432px;
-            height: 100px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .leaderboardBackBtn:hover {
-            transform: scale(1.05);
-        }
 
         /* 游戏制作信息弹窗 */
         .gameInfoModal {
@@ -1865,7 +1615,6 @@
             <!-- 技能配置面板右侧按钮 -->
             <div class="skillPanelSideButtons">
                 <img src="assets/figma_image/screenshot_605_476.webp" alt="游戏制作信息" class="skillPanelSideBtn" id="btnGameInfo" onclick="playBtnClickSound(); showGameInfo()">
-                <img src="assets/figma_image/screenshot_605_530.webp" alt="全球排行榜" class="skillPanelSideBtn" id="btnGlobalLeaderboard" onclick="playBtnClickSound(); showGlobalLeaderboardFromSkillPanel()">
             </div>
         </div>
         
@@ -1930,29 +1679,9 @@
                 </div>
             </div>
             
-            <!-- 排行榜上传询问气泡 -->
-            <div id="leaderboardBubble" class="leaderboardBubble">
-                <img src="assets/figma_image/screenshot_605_132.webp" alt="气泡背景" class="leaderboardBubbleBg">
-                <div class="leaderboardBubbleContent">
-                    <input type="text" id="playerNameInput" class="playerNameInput" placeholder="请输入英文ID" maxlength="20">
-                </div>
-                <img src="assets/figma_image/screenshot_605_140.webp" alt="上传" class="leaderboardUploadBtn" id="btnUploadLeaderboard">
-            </div>
-
             <!-- 通关页面右侧按钮 -->
             <div class="victorySideButtons" id="victorySideButtons">
                 <img src="assets/figma_image/screenshot_605_476.webp" alt="游戏制作信息" class="victorySideBtn" id="btnVictoryGameInfo" onclick="playBtnClickSound(); showGameInfo()">
-                <img src="assets/figma_image/screenshot_605_530.webp" alt="全球排行榜" class="victorySideBtn" id="btnVictoryLeaderboard" onclick="playBtnClickSound(); showVictoryLeaderboard()">
-            </div>
-        </div>
-
-        <!-- 排行榜弹窗 -->
-        <div id="leaderboardModal" class="leaderboardModal">
-            <div class="leaderboardModalContent">
-                <div class="leaderboardList" id="leaderboardList">
-                    <!-- 排行榜列表将动态生成 -->
-                </div>
-                <img src="assets/figma_image/screenshot_605_282.webp" alt="返回" class="leaderboardBackBtn" id="btnCloseLeaderboard">
             </div>
         </div>
 
@@ -1980,16 +1709,7 @@
     </div>
 
     <script>
-        // ==================== Supabase 配置 ====================
-        const SUPABASE_URL = 'https://zhypfwjfzkxsjtzuywnh.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoeXBmd2pmemt4c2p0enV5d25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTg3NTYsImV4cCI6MjA5NTE5NDc1Nn0.qOXMff2OKqCbUFlxl0_ofrCdq2quQAPcdtShetx0HxQ';
-        
-        // 初始化 Supabase 客户端
-        let supabaseClient = null;
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-        
+
         // ==================== 响应式缩放 ====================
         function updateGameScale() {
             const container = document.getElementById('gameContainer');
@@ -2444,8 +2164,6 @@
                 if (loadedCount >= totalAssets) {
                     gameState.assetsLoaded = true;
                     console.log('所有素材加载完成');
-                    // 加载排行榜数据
-                    loadLeaderboard();
                     setTimeout(() => {
                         showSkillPanel();
                     }, 500);
@@ -3203,17 +2921,7 @@
             animationDuration: 500 // 总动画时长0.5秒，根据队列长度动态分配每个数字的时间
         };
         
-        // 排行榜数据（使用localStorage存储）
-        let leaderboardData = [];
-        
-        // 当前玩家游戏数据（用于排行榜）
-        let currentPlayerData = {
-            name: '',
-            time: 0,
-            combo: 0,
-            skills: { speed: 0, hp: 0, ammo: 0 }
-        };
-        
+
         // MP动画状态
         let mpAnimation = {
             active: false,
@@ -4457,10 +4165,7 @@
             }
             gameOver = true;
 
-            // 保存当前玩家数据
-            currentPlayerData.time = finalGameTime;
-            currentPlayerData.combo = comboSystem.maxCount;
-            currentPlayerData.skills = { ...player.skillLevels };
+
 
             console.log('通关数据保存:', {
                 time: finalGameTime,
@@ -4481,37 +4186,6 @@
 
             // 显示通关页面右侧按钮
             victorySideButtons.classList.add('active');
-
-            // 延迟显示排行榜上传气泡
-            setTimeout(() => {
-                showLeaderboardBubble();
-            }, 1500);
-        }
-        
-        // 显示排行榜上传气泡
-        function showLeaderboardBubble() {
-            const bubble = document.getElementById('leaderboardBubble');
-            bubble.classList.add('active');
-        }
-        
-        // 隐藏排行榜上传气泡
-        function hideLeaderboardBubble() {
-            const bubble = document.getElementById('leaderboardBubble');
-            bubble.classList.remove('active');
-        }
-        
-        // 显示排行榜弹窗
-        function showLeaderboardModal() {
-            renderLeaderboard(true); // 显示高亮行
-            const modal = document.getElementById('leaderboardModal');
-            modal.classList.add('active');
-            createConfetti(); // 喷射彩带
-        }
-        
-        // 隐藏排行榜弹窗
-        function hideLeaderboardModal() {
-            const modal = document.getElementById('leaderboardModal');
-            modal.classList.remove('active');
         }
 
         // 显示游戏制作信息
@@ -4526,308 +4200,6 @@
             modal.classList.remove('active');
         }
 
-        // 显示loading提示
-        function showLoadingToast(message = 'Loading...') {
-            const toast = document.createElement('div');
-            toast.id = 'loadingToast';
-            toast.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0, 0, 0, 0.8);
-                color: #fff;
-                padding: 20px 40px;
-                border-radius: 10px;
-                font-size: 18px;
-                z-index: 9999;
-                pointer-events: none;
-            `;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            return toast;
-        }
-
-        // 隐藏loading提示
-        function hideLoadingToast() {
-            const toast = document.getElementById('loadingToast');
-            if (toast) {
-                toast.remove();
-            }
-        }
-
-        // 从技能配置面板显示全球排行榜
-        async function showGlobalLeaderboardFromSkillPanel() {
-            const toast = showLoadingToast('Loading...');
-            
-            // 设置5秒超时
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('timeout')), 5000);
-            });
-            
-            try {
-                await Promise.race([loadLeaderboard(), timeoutPromise]);
-                renderLeaderboard(false); // 不显示高亮行
-                const modal = document.getElementById('leaderboardModal');
-                modal.classList.add('active');
-            } catch (error) {
-                if (error.message === 'timeout') {
-                    alert('请稍后再试');
-                } else {
-                    console.error('加载排行榜失败:', error);
-                    alert('加载失败，请稍后再试');
-                }
-            } finally {
-                hideLoadingToast();
-            }
-        }
-
-        // 从通关页面显示全球排行榜
-        async function showVictoryLeaderboard() {
-            const toast = showLoadingToast('Loading...');
-            
-            // 设置5秒超时
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('timeout')), 5000);
-            });
-            
-            try {
-                await Promise.race([loadLeaderboard(), timeoutPromise]);
-                // 检查玩家是否已上传记录（通过检查currentPlayerData.name是否存在）
-                const hasUploaded = currentPlayerData.name && currentPlayerData.name !== '';
-                renderLeaderboard(hasUploaded); // 已上传显示高亮行，未上传不显示
-                const modal = document.getElementById('leaderboardModal');
-                modal.classList.add('active');
-            } catch (error) {
-                if (error.message === 'timeout') {
-                    alert('请稍后再试');
-                } else {
-                    console.error('加载排行榜失败:', error);
-                    alert('加载失败，请稍后再试');
-                }
-            } finally {
-                hideLoadingToast();
-            }
-        }
-
-        // 创建彩带碎片效果
-        function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#EDEA74'];
-            const container = document.getElementById('victoryScreen');
-            
-            // 从两侧喷射彩带
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.left = Math.random() < 0.5 ? '0px' : '100%';
-                    confetti.style.top = Math.random() * 100 + '%';
-                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
-                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
-                    confetti.style.borderRadius = Math.random() < 0.5 ? '50%' : '0';
-                    container.appendChild(confetti);
-                    
-                    // 动画
-                    const targetX = Math.random() < 0.5 ? Math.random() * 50 + 20 : Math.random() * 50 + 30;
-                    const targetY = Math.random() * 100;
-                    
-                    confetti.animate([
-                        { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
-                        { transform: `translate(${targetX}vw, ${targetY - 50}vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
-                    ], {
-                        duration: 1500 + Math.random() * 1000,
-                        easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-                    }).onfinish = () => confetti.remove();
-                }, i * 30);
-            }
-        }
-        
-        // 加载排行榜数据（从 Supabase）
-        async function loadLeaderboard() {
-            if (!supabaseClient) {
-                // 如果没有配置 Supabase，使用本地存储作为后备
-                const data = localStorage.getItem('submarineWarLeaderboard');
-                if (data) {
-                    leaderboardData = JSON.parse(data);
-                }
-                return;
-            }
-            
-            try {
-                const { data, error } = await supabaseClient
-                    .from('leaderboard_mobile')
-                    .select('*')
-                    .order('time', { ascending: true })
-                    .order('combo', { ascending: false })
-                    .limit(500);
-                
-                if (error) {
-                    console.error('加载排行榜失败:', error);
-                    return;
-                }
-                
-                // 转换数据格式
-                leaderboardData = data.map(item => ({
-                    name: item.name,
-                    time: item.time,
-                    combo: item.combo,
-                    skills: {
-                        speed: item.speed_level,
-                        hp: item.hp_level,
-                        ammo: item.ammo_level
-                    },
-                    date: item.created_at
-                }));
-            } catch (err) {
-                console.error('加载排行榜出错:', err);
-            }
-        }
-        
-        // 保存排行榜数据到本地（后备方案）
-        function saveLeaderboard() {
-            localStorage.setItem('submarineWarLeaderboard', JSON.stringify(leaderboardData));
-        }
-        
-        // 上传分数到排行榜（保存到 Supabase）
-        async function uploadToLeaderboard(playerName) {
-            if (!playerName || playerName.trim() === '') {
-                alert('请输入姓名！');
-                return false;
-            }
-            
-            // 检查是否只包含英文
-            if (!/^[a-zA-Z0-9\s]+$/.test(playerName)) {
-                alert('只能输入英文字母和数字！');
-                return false;
-            }
-            
-            currentPlayerData.name = playerName.trim();
-            
-            // 添加到本地数据
-            leaderboardData.push({
-                name: currentPlayerData.name,
-                time: currentPlayerData.time,
-                combo: currentPlayerData.combo,
-                skills: { ...currentPlayerData.skills },
-                date: new Date().toISOString()
-            });
-            
-            // 排序：按时间从低到高，时间相同按连击从高到低
-            leaderboardData.sort((a, b) => {
-                if (a.time !== b.time) {
-                    return a.time - b.time;
-                }
-                return b.combo - a.combo;
-            });
-            
-            // 只保留前500条记录
-            if (leaderboardData.length > 500) {
-                leaderboardData = leaderboardData.slice(0, 500);
-            }
-            
-            // 保存到本地作为后备
-            saveLeaderboard();
-            
-            // 如果配置了 Supabase，上传到云端
-            if (supabaseClient) {
-                try {
-                    console.log('正在上传到 Supabase...', {
-                        name: currentPlayerData.name,
-                        time: currentPlayerData.time,
-                        combo: currentPlayerData.combo,
-                        speed_level: currentPlayerData.skills.speed,
-                        hp_level: currentPlayerData.skills.hp,
-                        ammo_level: currentPlayerData.skills.ammo
-                    });
-                    
-                    const { data, error } = await supabaseClient
-                        .from('leaderboard_mobile')
-                        .insert({
-                            name: currentPlayerData.name,
-                            time: currentPlayerData.time,
-                            combo: currentPlayerData.combo,
-                            speed_level: currentPlayerData.skills.speed,
-                            hp_level: currentPlayerData.skills.hp,
-                            ammo_level: currentPlayerData.skills.ammo
-                        })
-                        .select();
-                    
-                    if (error) {
-                        console.error('上传到排行榜失败:', error);
-                        alert('上传失败: ' + error.message);
-                        return false;
-                    }
-                    
-                    console.log('上传成功:', data);
-                } catch (err) {
-                    console.error('上传排行榜出错:', err);
-                    alert('上传失败: ' + (err.message || '未知错误'));
-                    return false;
-                }
-            }
-            
-            return true;
-        }
-        
-        // 渲染排行榜
-        function renderLeaderboard(showHighlight = true) {
-            const listEl = document.getElementById('leaderboardList');
-            listEl.innerHTML = '';
-            
-            // 找到当前玩家的排名
-            let playerRank = -1;
-            let playerIndex = -1;
-            
-            if (showHighlight && currentPlayerData.name) {
-                playerIndex = leaderboardData.findIndex(p => 
-                    p.name === currentPlayerData.name && 
-                    p.time === currentPlayerData.time &&
-                    p.combo === currentPlayerData.combo
-                );
-                
-                if (playerIndex !== -1) {
-                    playerRank = playerIndex + 1;
-                }
-            }
-            
-            // 显示Top10
-            const top10 = leaderboardData.slice(0, 10);
-            top10.forEach((player, index) => {
-                const isCurrentPlayer = showHighlight && index === playerIndex;
-                const item = createLeaderboardItem(index + 1, player, isCurrentPlayer);
-                listEl.appendChild(item);
-            });
-            
-            // 如果玩家不在Top10但在500名内，显示玩家行
-            if (showHighlight && playerRank > 10 && playerRank <= 500) {
-                const playerData = leaderboardData[playerIndex];
-                const item = createLeaderboardItem(playerRank, playerData, true);
-                listEl.appendChild(item);
-            }
-        }
-        
-        // 创建排行榜条目
-        function createLeaderboardItem(rank, player, isHighlight) {
-            const item = document.createElement('div');
-            item.className = 'leaderboardItem rank' + rank + (isHighlight ? ' highlight' : '');
-            
-            const seconds = Math.floor(player.time / 1000).toString().padStart(2, '0');
-            const milliseconds = (player.time % 1000).toString().padStart(3, '0').slice(0, 2);
-            
-            item.innerHTML = `
-                <span class="leaderboardItemRank">NO.${rank}</span>
-                <span class="leaderboardItemName">${player.name}</span>
-                <span class="leaderboardItemTime">
-                    <span class="timeValue">${seconds}:${milliseconds}</span>
-                    <span class="timeUnit">s</span>
-                </span>
-                <span class="leaderboardItemCombo">${player.combo}连击</span>
-            `;
-            
-            return item;
-        }
-        
         // 格式化时间
         function formatTime(ms) {
             const seconds = Math.floor(ms / 1000).toString().padStart(2, '0');
@@ -4855,30 +4227,7 @@
             transitionToSkillPanel('victory');
         });
 
-        // 排行榜按钮事件监听
-        document.getElementById('btnUploadLeaderboard').addEventListener('click', async () => {
-            playBtnClickSound();
-            const playerName = document.getElementById('playerNameInput').value;
-            const success = await uploadToLeaderboard(playerName);
-            if (success) {
-                hideLeaderboardBubble();
-                renderLeaderboard();
-                showLeaderboardModal();
-            }
-        });
-        
-        // 点击气泡外部关闭
-        document.getElementById('leaderboardBubble').addEventListener('click', (e) => {
-            if (e.target.id === 'leaderboardBubble') {
-                playBtnClickSound();
-                hideLeaderboardBubble();
-            }
-        });
 
-        document.getElementById('btnCloseLeaderboard').addEventListener('click', () => {
-            playBtnClickSound();
-            hideLeaderboardModal();
-        });
 
         // 检查水雷与Boss碰撞
         function checkMineBossCollision(mine) {
@@ -7949,30 +7298,8 @@
                     const isVictoryScreenActive = victoryScreen && victoryScreen.classList.contains('active');
                     const gameOverScreen = document.getElementById('gameOverScreen');
                     const isGameOverScreenActive = gameOverScreen && gameOverScreen.classList.contains('active');
-                    const leaderboardBubble = document.getElementById('leaderboardBubble');
-                    const isLeaderboardBubbleActive = leaderboardBubble && leaderboardBubble.classList.contains('active');
                     
-                    // 先检查是否是排行榜上传气泡显示中
-                    if (isLeaderboardBubbleActive) {
-                        // 排行榜上传气泡处理
-                        // 注意：不要阻止默认行为，否则输入框无法输入
-                        
-                        if (e.key === 'Enter') {
-                            e.preventDefault(); // 只在回车时阻止默认行为
-                            e.stopPropagation(); // 阻止事件冒泡
-                            // 回车键触发上传
-                            playBtnClickSound();
-                            const playerNameInput = document.getElementById('playerNameInput');
-                            if (playerNameInput) {
-                                // 模拟点击上传按钮
-                                const uploadBtn = document.getElementById('btnUploadLeaderboard');
-                                if (uploadBtn) {
-                                    uploadBtn.click();
-                                }
-                            }
-                            return;
-                        }
-                    } else if (isVictoryScreenActive) {
+                    if (isVictoryScreenActive) {
                         // 通关界面处理
                         e.preventDefault(); // 阻止默认行为
                         e.stopPropagation(); // 阻止事件冒泡
