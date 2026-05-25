@@ -1,0 +1,50 @@
+* {
+  box-sizing: border-box;
+}
+
+.group57 {
+  position: relative;
+  width: 187px;
+  height: 79px;
+
+  .frame {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    align-items: center;
+    opacity: 0.7;
+    width: 187px;
+    height: 79px;
+
+    .rectangle93 {
+      display: flex;
+      flex-grow: 1;
+      align-items: center;
+      border-radius: 39px;
+      background: #000000b2;
+
+      .rectangle94 {
+        outline-width: 8px;
+        outline-style: solid;
+        outline-color: #ffffff;
+        border-radius: 39px;
+        width: 187px;
+        height: 79px;
+      }
+    }
+  }
+
+  .pause {
+    position: absolute;
+    top: 22px;
+    left: 35px;
+    width: 119px;
+    height: 34px;
+    line-height: 34px;
+    letter-spacing: 0;
+    color: #ffffff;
+    font-family: "HYQiHeiY3", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+    font-size: 38px;
+  }
+}

@@ -1589,11 +1589,13 @@
 
         .movement-controls {
             margin-left: 100px;
+            position: relative;
+            left: -13px;
         }
 
         .action-controls {
             position: absolute;
-            left: 1350px;
+            left: 1400px;
         }
 
         .virtual-btn {
@@ -1686,6 +1688,8 @@
             width: 516px; /* 新贴图宽度 */
             height: 226px; /* 新贴图高度 */
             border-radius: 113px; /* 圆角矩形，高度的一半 */
+            position: relative;
+            left: -60px;
         }
 
         .btn-move img {
@@ -1697,6 +1701,35 @@
 
         .btn-move:active {
             transform: scale(0.95);
+        }
+
+        /* 暂停按钮样式 */
+        .btn-pause {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            overflow: hidden;
+            width: 204px;
+            height: 95px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 121px;
+            pointer-events: auto; /* 确保按钮可以接收点击事件 */
+            z-index: 1501; /* 确保按钮在最上层 */
+            border-radius: 47px; /* 圆角矩形，高度的一半 */
+        }
+
+        .btn-pause img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .btn-pause:active {
+            transform: translateX(-50%) scale(0.95);
         }
 
         /* 移动端横屏适配 */
@@ -1936,6 +1969,8 @@
             <div class="movement-controls">
                 <button class="virtual-btn btn-move" id="btnMove"><img src="assets/figma_image/btn_move.webp" alt="移动"></button>
             </div>
+            <!-- 中间暂停按钮 -->
+            <button class="virtual-btn btn-pause" id="btnPause"><img src="assets/figma_image/btn_pause.webp" alt="暂停"></button>
             <!-- 右侧操作按钮 -->
             <div class="action-controls">
                 <button class="virtual-btn btn-b" id="btnSuper"><img src="assets/figma_image/btn_a.webp" alt="B"></button>
@@ -1946,8 +1981,8 @@
 
     <script>
         // ==================== Supabase 配置 ====================
-        const SUPABASE_URL = 'https://qmgvhcnfvnydfughmvwr.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtZ3ZoY25mdm55ZGZ1Z2htdndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNzA4MzcsImV4cCI6MjA5Mjk0NjgzN30.16nNAyl6aHj2vVqJiyGy7YcxYNC2UpmYfZUmgIGFlgQ';
+        const SUPABASE_URL = 'https://zhypfwjfzkxsjtzuywnh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoeXBmd2pmemt4c2p0enV5d25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTg3NTYsImV4cCI6MjA5NTE5NDc1Nn0.qOXMff2OKqCbUFlxl0_ofrCdq2quQAPcdtShetx0HxQ';
         
         // 初始化 Supabase 客户端
         let supabaseClient = null;
@@ -2115,6 +2150,7 @@
         
         // BGM是否已播放标志
         let bgmHasStarted = false;
+        let isBossBgmExpected = false; // 标志是否期望播放 Boss BGM，防止意外播放
         
         // 场景速度过渡状态
         let sceneSpeedTransition = {
@@ -2782,6 +2818,7 @@
                     // 从游戏结束界面离开时重新开始主BGM
                     setTimeout(() => {
                         try {
+                            isBossBgmExpected = false;
                             if (assets.bossBgm) {
                                 assets.bossBgm.pause();
                                 assets.bossBgm.currentTime = 0;
@@ -2815,6 +2852,7 @@
                     // 从通关界面离开时停止Boss BGM，重新开始主BGM
                     setTimeout(() => {
                         try {
+                            isBossBgmExpected = false;
                             if (assets.bossBgm) {
                                 assets.bossBgm.pause();
                                 assets.bossBgm.currentTime = 0;
@@ -3435,6 +3473,7 @@
             
             // 重置BGM播放标志
             bgmHasStarted = false;
+            isBossBgmExpected = false;
             
             // 重置Boss状态
             boss.active = false;
@@ -3804,26 +3843,51 @@
                         assets.mainBgm.pause();
                         assets.mainBgm.currentTime = 0;
                     }
+                    
+                    isBossBgmExpected = true;
+                    
                     // 播放Boss BGM
                     if (assets.bossBgm && assets.bossBgm.src) {
                         assets.bossBgm.currentTime = 0;
-                        assets.bossBgm.play().then(() => {
-                            console.log('Boss BGM播放成功');
-                        }).catch(e => {
-                            console.log('Boss BGM播放失败，尝试重新加载:', e);
-                            // 安卓兼容性处理
-                            assets.bossBgm.load();
+                        
+                        // 安卓兼容性：确保音频已加载
+                        const playBossBgm = () => {
+                            if (!isBossBgmExpected) return;
+                            
+                            assets.bossBgm.play().then(() => {
+                                console.log('Boss BGM播放成功');
+                            }).catch(e => {
+                                console.log('Boss BGM播放失败，尝试重新加载:', e);
+                                if (!isBossBgmExpected) return;
+                                // 安卓兼容性处理：重新加载音频
+                                assets.bossBgm.load();
+                                setTimeout(() => {
+                                    if (!isBossBgmExpected) return;
+                                    assets.bossBgm.play().catch(err => {
+                                        console.log('Boss BGM重新加载后仍播放失败:', err);
+                                    });
+                                }, 200);
+                            });
+                        };
+                        
+                        // 检查音频是否已加载
+                        if (assets.bossBgm.readyState >= 2) {
+                            playBossBgm();
+                        } else {
+                            // 等待音频加载完成
+                            assets.bossBgm.addEventListener('canplaythrough', playBossBgm, { once: true });
+                            // 超时处理
                             setTimeout(() => {
-                                assets.bossBgm.play().catch(err => {
-                                    console.log('Boss BGM重新加载后仍播放失败:', err);
-                                });
-                            }, 100);
-                        });
+                                if (assets.bossBgm.paused && isBossBgmExpected) {
+                                    playBossBgm();
+                                }
+                            }, 1000);
+                        }
                     }
                 } catch (e) {
                     console.log('BGM切换异常:', e);
                 }
-            }, 0);
+            }, 100);
             
             console.log('Boss激活，开始入场');
         }
@@ -4602,7 +4666,7 @@
             
             try {
                 const { data, error } = await supabaseClient
-                    .from('leaderboard')
+                    .from('leaderboard_mobile')
                     .select('*')
                     .order('time', { ascending: true })
                     .order('combo', { ascending: false })
@@ -4688,7 +4752,7 @@
                     });
                     
                     const { data, error } = await supabaseClient
-                        .from('leaderboard')
+                        .from('leaderboard_mobile')
                         .insert({
                             name: currentPlayerData.name,
                             time: currentPlayerData.time,
@@ -7901,10 +7965,11 @@
                     // 先检查是否是排行榜上传气泡显示中
                     if (isLeaderboardBubbleActive) {
                         // 排行榜上传气泡处理
-                        e.preventDefault(); // 阻止默认行为
-                        e.stopPropagation(); // 阻止事件冒泡
+                        // 注意：不要阻止默认行为，否则输入框无法输入
                         
                         if (e.key === 'Enter') {
+                            e.preventDefault(); // 只在回车时阻止默认行为
+                            e.stopPropagation(); // 阻止事件冒泡
                             // 回车键触发上传
                             playBtnClickSound();
                             const playerNameInput = document.getElementById('playerNameInput');
@@ -8112,6 +8177,20 @@
         btnMove.addEventListener('mousedown', handleMoveStart);
         btnMove.addEventListener('mouseup', handleMoveEnd);
         btnMove.addEventListener('mouseleave', handleMoveEnd);
+
+        // 暂停按钮
+        const btnPause = document.getElementById('btnPause');
+        btnPause.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState.currentScreen === 'game' && !gameOver && !bossDefeatState.showBubble) {
+                togglePause();
+            }
+        });
+        btnPause.addEventListener('mousedown', () => {
+            if (gameState.currentScreen === 'game' && !gameOver && !bossDefeatState.showBubble) {
+                togglePause();
+            }
+        });
 
         // 发射按钮
         btnFire.addEventListener('touchstart', (e) => {
@@ -8513,6 +8592,20 @@
             
             setTimeout(() => {
                 try {
+                    // 解锁 Boss BGM（为了在安卓端支持后续播放）
+                    if (assets.bossBgm && assets.bossBgm.src) {
+                        assets.bossBgm.load();
+                        let originalBossVol = assets.bossBgm.volume;
+                        assets.bossBgm.volume = 0;
+                        assets.bossBgm.play().then(() => {
+                            assets.bossBgm.pause();
+                            assets.bossBgm.currentTime = 0;
+                            assets.bossBgm.volume = originalBossVol;
+                        }).catch(e => {
+                            console.log('Boss BGM 预解锁失败:', e);
+                        });
+                    }
+
                     if (assets.mainBgm && assets.mainBgm.src && assets.mainBgm.paused) {
                         assets.mainBgm.currentTime = 0;
                         assets.mainBgm.play().then(() => {
