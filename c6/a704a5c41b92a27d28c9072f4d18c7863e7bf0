@@ -1,0 +1,249 @@
+index.html
+  0eb57a3d0a4bae6f 2242,2822,2824,2826,2851,2853,2855,3102-3106,3520-3523,3525,3838-3844,3850,3856,3859,3867,3871,3874,4371-4372,5838-5839,8579,8582-8583,8585-8607,8609-8612,8616-8619 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a13cefebaf4ff2a3a176424","tool_type":"agent","tool_id":"SearchReplace","line_ranges":[{"Single":2242},{"Single":2822},{"Single":2824},{"Single":2826},{"Single":2851},{"Single":2853},{"Single":2855},{"Range":[3102,3106]},{"Range":[3520,3523]},{"Single":3525},{"Range":[3838,3844]},{"Single":3850},{"Single":3856},{"Single":3859},{"Single":3867},{"Single":3871},{"Single":3874},{"Range":[4371,4372]},{"Range":[5838,5839]},{"Single":8579},{"Range":[8582,8583]},{"Range":[8585,8607]},{"Range":[8609,8612]},{"Range":[8616,8619]}]}]}
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "c6a704a5c41b92a27d28c9072f4d18c7863e7bf0",
+  "prompts": {
+    "0eb57a3d0a4bae6f": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a125424baf4ff2a3a1754d5",
+        "model": "gemini-3.1-pro__dev"
+      },
+      "human_author": "zzfige-cyber <zzfige@gmail.com>",
+      "messages": [],
+      "total_additions": 216,
+      "total_deletions": 300,
+      "accepted_lines": 73,
+      "overriden_lines": 41
+    }
+  },
+  "attestation_metadata": {
+    "index.html": [
+      {
+        "hash": "0eb57a3d0a4bae6f",
+        "line_ranges": [
+          {
+            "Single": 2242
+          },
+          {
+            "Single": 2822
+          },
+          {
+            "Single": 2824
+          },
+          {
+            "Single": 2826
+          },
+          {
+            "Single": 2851
+          },
+          {
+            "Single": 2853
+          },
+          {
+            "Single": 2855
+          },
+          {
+            "Range": [
+              3102,
+              3106
+            ]
+          },
+          {
+            "Range": [
+              3520,
+              3523
+            ]
+          },
+          {
+            "Single": 3525
+          },
+          {
+            "Range": [
+              3838,
+              3844
+            ]
+          },
+          {
+            "Single": 3850
+          },
+          {
+            "Single": 3856
+          },
+          {
+            "Single": 3859
+          },
+          {
+            "Single": 3867
+          },
+          {
+            "Single": 3871
+          },
+          {
+            "Single": 3874
+          },
+          {
+            "Range": [
+              4371,
+              4372
+            ]
+          },
+          {
+            "Range": [
+              5838,
+              5839
+            ]
+          },
+          {
+            "Single": 8579
+          },
+          {
+            "Range": [
+              8582,
+              8583
+            ]
+          },
+          {
+            "Range": [
+              8585,
+              8607
+            ]
+          },
+          {
+            "Range": [
+              8609,
+              8612
+            ]
+          },
+          {
+            "Range": [
+              8616,
+              8619
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a13cefebaf4ff2a3a176424",
+            "tool_type": "agent",
+            "tool_id": "SearchReplace",
+            "line_ranges": [
+              {
+                "Single": 2242
+              },
+              {
+                "Single": 2822
+              },
+              {
+                "Single": 2824
+              },
+              {
+                "Single": 2826
+              },
+              {
+                "Single": 2851
+              },
+              {
+                "Single": 2853
+              },
+              {
+                "Single": 2855
+              },
+              {
+                "Range": [
+                  3102,
+                  3106
+                ]
+              },
+              {
+                "Range": [
+                  3520,
+                  3523
+                ]
+              },
+              {
+                "Single": 3525
+              },
+              {
+                "Range": [
+                  3838,
+                  3844
+                ]
+              },
+              {
+                "Single": 3850
+              },
+              {
+                "Single": 3856
+              },
+              {
+                "Single": 3859
+              },
+              {
+                "Single": 3867
+              },
+              {
+                "Single": 3871
+              },
+              {
+                "Single": 3874
+              },
+              {
+                "Range": [
+                  4371,
+                  4372
+                ]
+              },
+              {
+                "Range": [
+                  5838,
+                  5839
+                ]
+              },
+              {
+                "Single": 8579
+              },
+              {
+                "Range": [
+                  8582,
+                  8583
+                ]
+              },
+              {
+                "Range": [
+                  8585,
+                  8607
+                ]
+              },
+              {
+                "Range": [
+                  8609,
+                  8612
+                ]
+              },
+              {
+                "Range": [
+                  8616,
+                  8619
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "remote_transcripts": {
+    "0eb57a3d0a4bae6f": {
+      "tool": "trae",
+      "conversation_id": "6a125424baf4ff2a3a1754d5",
+      "session_id": "6a125424baf4ff2a3a1754d5",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    }
+  }
+}
