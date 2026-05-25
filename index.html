@@ -2239,7 +2239,7 @@
             bossLaserSound: '音效/boss激光.mp3', // Boss激光发射音效
             explosionSound: '音效/爆炸.m4a', // 爆炸音效
             waterSplashSound: '音效/浪花声音.m4a', // 浪花音效
-            bossBgm: '音效/boss bgm.m4a', // Boss阶段BGM
+            bossBgm: '音效/boss_bgm.m4a', // Boss阶段BGM
             mainBgm: '音效/潜艇大战bgm.m4a', // 主游戏BGM
             btnClickSound: '音效/btn点击.m4a', // 按钮点击音效
             bossWarningSound: '音效/boss出场警告.m4a', // Boss出场警告音效
@@ -2819,16 +2819,11 @@
                     setTimeout(() => {
                         try {
                             isBossBgmExpected = false;
-                            if (assets.bossBgm) {
-                                assets.bossBgm.pause();
-                                assets.bossBgm.currentTime = 0;
-                            }
-                            // 先确保主BGM已暂停
-                            if (assets.mainBgm && !assets.mainBgm.paused) {
+                            if (assets.mainBgm) {
                                 assets.mainBgm.pause();
-                            }
-                            if (assets.mainBgm && assets.mainBgm.src) {
+                                assets.mainBgm.src = assetPaths.mainBgm;
                                 assets.mainBgm.currentTime = 0;
+                                assets.mainBgm.volume = 0.5;
                                 assets.mainBgm.play().then(() => {
                                     bgmHasStarted = true;
                                 }).catch(e => {
@@ -2853,16 +2848,11 @@
                     setTimeout(() => {
                         try {
                             isBossBgmExpected = false;
-                            if (assets.bossBgm) {
-                                assets.bossBgm.pause();
-                                assets.bossBgm.currentTime = 0;
-                            }
-                            // 先确保主BGM已暂停
-                            if (assets.mainBgm && !assets.mainBgm.paused) {
+                            if (assets.mainBgm) {
                                 assets.mainBgm.pause();
-                            }
-                            if (assets.mainBgm && assets.mainBgm.src) {
+                                assets.mainBgm.src = assetPaths.mainBgm;
                                 assets.mainBgm.currentTime = 0;
+                                assets.mainBgm.volume = 0.5;
                                 assets.mainBgm.play().then(() => {
                                     bgmHasStarted = true;
                                 }).catch(e => {
@@ -3109,6 +3099,11 @@
         let deltaTime = 0; // 两帧之间的时间差（秒）
         
         function startGame() {
+            // 确保 BGM 在用户点击的同步上下文中解锁/播放
+            if (!bgmHasStarted) {
+                playBgmOnFirstInteraction();
+            }
+
             const skillPanel = document.getElementById('skillPanel');
             const shipDisplay = document.querySelector('.playerShipDisplay');
             
@@ -3522,12 +3517,12 @@
             // 停止所有BGM，然后重新开始主游戏BGM
             setTimeout(() => {
                 try {
-                    if (assets.bossBgm) {
-                        assets.bossBgm.pause();
-                        assets.bossBgm.currentTime = 0;
-                    }
-                    if (assets.mainBgm && assets.mainBgm.src) {
+                    isBossBgmExpected = false;
+                    if (assets.mainBgm) {
+                        assets.mainBgm.pause();
+                        assets.mainBgm.src = assetPaths.mainBgm;
                         assets.mainBgm.currentTime = 0;
+                        assets.mainBgm.volume = 0.5;
                         assets.mainBgm.play().then(() => {
                             bgmHasStarted = true;
                             console.log('主游戏BGM播放成功');
@@ -3838,32 +3833,30 @@
             // 停止主游戏BGM，播放Boss BGM
             setTimeout(() => {
                 try {
-                    // 先停止主游戏BGM
-                    if (assets.mainBgm) {
-                        assets.mainBgm.pause();
-                        assets.mainBgm.currentTime = 0;
-                    }
-                    
                     isBossBgmExpected = true;
                     
-                    // 播放Boss BGM
-                    if (assets.bossBgm && assets.bossBgm.src) {
-                        assets.bossBgm.currentTime = 0;
+                    // 复用 mainBgm 实例播放 Boss BGM，这是解决安卓/iOS音频限制的最稳妥方案
+                    if (assets.mainBgm && assetPaths.bossBgm) {
+                        assets.mainBgm.pause();
+                        assets.mainBgm.src = assetPaths.bossBgm;
+                        assets.mainBgm.loop = true;
+                        assets.mainBgm.currentTime = 0;
+                        assets.mainBgm.volume = 0.6; // 恢复正常音量
                         
                         // 安卓兼容性：确保音频已加载
                         const playBossBgm = () => {
                             if (!isBossBgmExpected) return;
                             
-                            assets.bossBgm.play().then(() => {
+                            assets.mainBgm.play().then(() => {
                                 console.log('Boss BGM播放成功');
                             }).catch(e => {
                                 console.log('Boss BGM播放失败，尝试重新加载:', e);
                                 if (!isBossBgmExpected) return;
                                 // 安卓兼容性处理：重新加载音频
-                                assets.bossBgm.load();
+                                assets.mainBgm.load();
                                 setTimeout(() => {
                                     if (!isBossBgmExpected) return;
-                                    assets.bossBgm.play().catch(err => {
+                                    assets.mainBgm.play().catch(err => {
                                         console.log('Boss BGM重新加载后仍播放失败:', err);
                                     });
                                 }, 200);
@@ -3871,14 +3864,14 @@
                         };
                         
                         // 检查音频是否已加载
-                        if (assets.bossBgm.readyState >= 2) {
+                        if (assets.mainBgm.readyState >= 2) {
                             playBossBgm();
                         } else {
                             // 等待音频加载完成
-                            assets.bossBgm.addEventListener('canplaythrough', playBossBgm, { once: true });
+                            assets.mainBgm.addEventListener('canplaythrough', playBossBgm, { once: true });
                             // 超时处理
                             setTimeout(() => {
-                                if (assets.bossBgm.paused && isBossBgmExpected) {
+                                if (assets.mainBgm.paused && isBossBgmExpected) {
                                     playBossBgm();
                                 }
                             }, 1000);
@@ -4375,13 +4368,10 @@
                 });
             }
             
-            // 只停止主BGM，Boss BGM继续播放到通关界面
+            // 注意：由于现在采用单实例复用方案，assets.mainBgm 此时正在播放 Boss BGM
+            // 所以这里不再调用 pause()，让其在通关界面继续播放
             setTimeout(() => {
                 try {
-                    if (assets.mainBgm) {
-                        assets.mainBgm.pause();
-                        assets.mainBgm.currentTime = 0;
-                    }
                     // Boss BGM不停止，在通关界面继续播放
                 } catch (e) {
                     console.log('BGM停止异常:', e);
@@ -5845,8 +5835,8 @@
                     if (assets.waterSplashSound && assets.waterSplashSound.src) {
                         // 克隆音效对象以支持同时播放多个浪花音效
                         const sound = assets.waterSplashSound.cloneNode(true);
-                        // 基础音量0.21（降低30%），随机变化±0.105，最终范围0.105-0.315
-                        const randomVolume = Math.max(0, Math.min(1, 0.21 + (Math.random() - 0.5) * 0.21));
+                        // 基础音量0.168（在之前降低的基础上再减少20%），随机变化±0.084，最终范围0.084-0.252
+                        const randomVolume = Math.max(0, Math.min(1, 0.168 + (Math.random() - 0.5) * 0.168));
                         sound.volume = randomVolume;
                         sound.play().catch(e => {
                             console.log('浪花音效播放失败:', e);
@@ -8586,56 +8576,47 @@
         window.onload = initLoading;
         
         // ==================== BGM 自动播放 ====================
+        let bgmIsStarting = false;
         // 在用户第一次点击游戏页面时播放 BGM
         function playBgmOnFirstInteraction() {
-            if (bgmHasStarted) return;
+            if (bgmHasStarted || bgmIsStarting) return;
+            bgmIsStarting = true;
             
-            setTimeout(() => {
-                try {
-                    // 解锁 Boss BGM（为了在安卓端支持后续播放）
-                    if (assets.bossBgm && assets.bossBgm.src) {
-                        assets.bossBgm.load();
-                        let originalBossVol = assets.bossBgm.volume;
-                        assets.bossBgm.volume = 0;
-                        assets.bossBgm.play().then(() => {
-                            assets.bossBgm.pause();
-                            assets.bossBgm.currentTime = 0;
-                            assets.bossBgm.volume = originalBossVol;
-                        }).catch(e => {
-                            console.log('Boss BGM 预解锁失败:', e);
-                        });
-                    }
-
-                    if (assets.mainBgm && assets.mainBgm.src && assets.mainBgm.paused) {
-                        assets.mainBgm.currentTime = 0;
-                        assets.mainBgm.play().then(() => {
-                            bgmHasStarted = true;
-                            console.log('BGM 已开始播放（用户首次交互）');
-                        }).catch(e => {
-                            console.log('主游戏 BGM 播放失败，尝试重新加载:', e);
-                            // 安卓兼容性处理：重新加载音频后再次尝试播放
-                            assets.mainBgm.load();
-                            setTimeout(() => {
-                                assets.mainBgm.play().then(() => {
-                                    bgmHasStarted = true;
-                                    console.log('BGM 重新加载后播放成功');
-                                }).catch(err => {
-                                    console.log('BGM 重新加载后仍播放失败:', err);
-                                });
-                            }, 100);
-                        });
-                    }
-                } catch (e) {
-                    console.log('主游戏 BGM 播放异常:', e);
+            try {
+                if (assets.mainBgm && assets.mainBgm.src && assets.mainBgm.paused) {
+                    assets.mainBgm.currentTime = 0;
+                    assets.mainBgm.play().then(() => {
+                        bgmHasStarted = true;
+                        console.log('BGM 已开始播放（用户首次交互）');
+                    }).catch(e => {
+                        console.log('主游戏 BGM 播放失败，尝试重新加载:', e);
+                        // 安卓兼容性处理：重新加载音频后再次尝试播放
+                        assets.mainBgm.load();
+                        setTimeout(() => {
+                            assets.mainBgm.play().then(() => {
+                                bgmHasStarted = true;
+                                console.log('BGM 重新加载后播放成功');
+                            }).catch(err => {
+                                console.log('BGM 重新加载后仍播放失败:', err);
+                                bgmIsStarting = false; // 允许下次点击重试
+                            });
+                        }, 100);
+                    });
+                } else {
+                    // 如果 mainBgm 不需要播放，重置标记
+                    if (!bgmHasStarted) bgmIsStarting = false;
                 }
-            }, 0);
+            } catch (e) {
+                console.log('主游戏 BGM 播放异常:', e);
+                bgmIsStarting = false;
+            }
         }
         
         // 添加全局点击事件监听
-        document.addEventListener('click', playBgmOnFirstInteraction, { once: true });
-        document.addEventListener('touchstart', playBgmOnFirstInteraction, { once: true });
-        document.addEventListener('touchend', playBgmOnFirstInteraction, { once: true });
-        document.addEventListener('keydown', playBgmOnFirstInteraction, { once: true });
+        document.addEventListener('click', playBgmOnFirstInteraction);
+        document.addEventListener('touchstart', playBgmOnFirstInteraction);
+        document.addEventListener('touchend', playBgmOnFirstInteraction);
+        document.addEventListener('keydown', playBgmOnFirstInteraction);
     </script>
 </body>
 </html>
