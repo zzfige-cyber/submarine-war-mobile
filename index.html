@@ -3651,9 +3651,8 @@
                     // 播放激光发射音效（完全隔离，防止影响游戏逻辑）
                     setTimeout(() => {
                         try {
-                            if (assets.bossLaserSound && assets.bossLaserSound.src) {
-                                // 克隆音效对象，避免影响原始对象状态
-                                const sound = assets.bossLaserSound.cloneNode(true);
+                            const sound = AudioPool.get(assets.bossLaserSound);
+                            if (sound) {
                                 sound.play().catch(e => {
                                     console.log('Boss激光音效播放失败:', e);
                                 });
@@ -5188,12 +5187,12 @@
             // 播放浪花音效（完全隔离，防止影响游戏逻辑）
             setTimeout(() => {
                 try {
-                    if (assets.waterSplashSound && assets.waterSplashSound.src) {
-                        // 克隆音效对象以支持同时播放多个浪花音效
-                        const sound = assets.waterSplashSound.cloneNode(true);
+                    const sound = AudioPool.get(assets.waterSplashSound);
+                    if (sound) {
                         // 基础音量0.168（在之前降低的基础上再减少20%），随机变化±0.084，最终范围0.084-0.252
                         const randomVolume = Math.max(0, Math.min(1, 0.168 + (Math.random() - 0.5) * 0.168));
                         sound.volume = randomVolume;
+                        sound.currentTime = 0;
                         sound.play().catch(e => {
                             console.log('浪花音效播放失败:', e);
                         });
@@ -6849,6 +6848,40 @@
             return spriteCanvasCache[spriteDataKey][frameName];
         }
 
+        // ==================== 音效对象池 ====================
+        const AudioPool = {
+            pools: {},
+            get: function(audioAsset) {
+                if (!audioAsset || !audioAsset.src) return null;
+                const src = audioAsset.src;
+                if (!this.pools[src]) {
+                    this.pools[src] = [];
+                }
+                const pool = this.pools[src];
+                
+                // 查找空闲的音频对象
+                for (let i = 0; i < pool.length; i++) {
+                    if (pool[i].paused || pool[i].ended) {
+                        return pool[i];
+                    }
+                }
+                
+                // 如果池子满了（限制每个音效最多5个实例），复用最旧的一个（即第一个）
+                if (pool.length >= 5) {
+                    const oldest = pool.shift();
+                    oldest.pause();
+                    oldest.currentTime = 0;
+                    pool.push(oldest);
+                    return oldest;
+                }
+                
+                // 创建新实例并加入池中
+                const newAudio = audioAsset.cloneNode(true);
+                pool.push(newAudio);
+                return newAudio;
+            }
+        };
+
         // ==================== 对象池 ====================
         const ObjectPool = {
             explosions: [],
@@ -6979,9 +7012,10 @@
                         // 播放分裂弹道具音效
                         setTimeout(() => {
                             try {
-                                if (assets.splitAmmoSound && assets.splitAmmoSound.src) {
-                                    const sound = assets.splitAmmoSound.cloneNode(true);
+                                const sound = AudioPool.get(assets.splitAmmoSound);
+                                if (sound) {
                                     sound.volume = 0.72;
+                                    sound.currentTime = 0;
                                     sound.play().catch(e => {});
                                 }
                             } catch (e) {}
@@ -7056,12 +7090,12 @@
             // 播放爆炸音效（完全隔离，防止影响游戏逻辑）
             setTimeout(() => {
                 try {
-                    if (assets.explosionSound && assets.explosionSound.src) {
-                        // 克隆音效对象以支持同时播放多个爆炸音效
-                        const sound = assets.explosionSound.cloneNode(true);
+                    const sound = AudioPool.get(assets.explosionSound);
+                    if (sound) {
                         // 随机音量：0.52 到 1.0 之间（上调30%），每次爆炸音量略有不同
                         const randomVolume = 0.52 + Math.random() * 0.48;
                         sound.volume = randomVolume;
+                        sound.currentTime = 0;
                         sound.play().catch(e => {
                             console.log('爆炸音效播放失败:', e);
                         });
@@ -7076,9 +7110,10 @@
         function playBtnClickSound() {
             setTimeout(() => {
                 try {
-                    if (assets.btnClickSound && assets.btnClickSound.src) {
-                        const sound = assets.btnClickSound.cloneNode(true);
+                    const sound = AudioPool.get(assets.btnClickSound);
+                    if (sound) {
                         sound.volume = 0.6;
+                        sound.currentTime = 0;
                         sound.play().catch(e => {
                             console.log('按钮点击音效播放失败:', e);
                         });
@@ -7093,9 +7128,10 @@
         function playDiceSound() {
             setTimeout(() => {
                 try {
-                    if (assets.diceSound && assets.diceSound.src) {
-                        const sound = assets.diceSound.cloneNode(true);
+                    const sound = AudioPool.get(assets.diceSound);
+                    if (sound) {
                         sound.volume = 0.7;
+                        sound.currentTime = 0;
                         sound.play().catch(e => {
                             console.log('骰子音效播放失败:', e);
                         });
@@ -7113,9 +7149,10 @@
             
             setTimeout(() => {
                 try {
-                    if (assets.mpFullSound && assets.mpFullSound.src) {
-                        const sound = assets.mpFullSound.cloneNode(true);
+                    const sound = AudioPool.get(assets.mpFullSound);
+                    if (sound) {
                         sound.volume = 0.9;
+                        sound.currentTime = 0;
                         sound.play().catch(e => {
                             console.log('MP满提示音效播放失败:', e);
                         });
@@ -7265,9 +7302,10 @@
                 // 播放Boss警告音效（完全隔离，防止影响游戏逻辑）
                 setTimeout(() => {
                     try {
-                        if (assets.bossWarningSound && assets.bossWarningSound.src) {
-                            const sound = assets.bossWarningSound.cloneNode(true);
+                        const sound = AudioPool.get(assets.bossWarningSound);
+                        if (sound) {
                             sound.volume = 0.7;
+                            sound.currentTime = 0;
                             sound.play().catch(e => {
                                 console.log('Boss警告音效播放失败:', e);
                             });
@@ -7879,9 +7917,10 @@
             // 播放超级武器音效（完全隔离，防止影响游戏逻辑）
             setTimeout(() => {
                 try {
-                    if (assets.superWeaponSound && assets.superWeaponSound.src) {
-                        const sound = assets.superWeaponSound.cloneNode(true);
+                    const sound = AudioPool.get(assets.superWeaponSound);
+                    if (sound) {
                         sound.volume = 0.8;
+                        sound.currentTime = 0;
                         sound.play().catch(e => {
                             console.log('超级武器音效播放失败:', e);
                         });
