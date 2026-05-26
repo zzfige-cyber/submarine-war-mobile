@@ -3790,17 +3790,17 @@
                 const angle = (Math.PI / bulletCount) * i + Math.random() * 0.5; // 扇形分布
                 const speed = (3 + Math.random() * 2) * 144; // 转换为每秒像素（144Hz基准）
                 
-                bossBullets.push({
-                    x: boss.x + boss.width / 2,
-                    y: boss.y + boss.height / 2,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    radius: 10.4, // 子弹大小增加30%（8 * 1.3 = 10.4）
-                    delay: 2000, // 2秒延迟后开始上浮
-                    startTime: Date.now(),
-                    active: true,
-                    damage: 1 // Boss子弹-1点生命值
-                });
+                const obj = ObjectPool.get('bossBullets', {});
+                obj.x = boss.x + boss.width / 2;
+                obj.y = boss.y + boss.height / 2;
+                obj.vx = Math.cos(angle) * speed;
+                obj.vy = Math.sin(angle) * speed;
+                obj.radius = 10.4; // 子弹大小增加30%（8 * 1.3 = 10.4）
+                obj.delay = 2000; // 2秒延迟后开始上浮
+                obj.startTime = Date.now();
+                obj.active = true;
+                obj.damage = 1; // Boss子弹-1点生命值
+                bossBullets.push(obj);
             }
         }
 
@@ -3826,21 +3826,21 @@
             
             missilePositions.forEach((posX, index) => {
                 setTimeout(() => {
-                    bossMissiles.push({
-                        x: posX,
-                        y: boss.y + boss.height / 2,
-                        width: 107, // Boss导弹宽度
-                        height: 33, // Boss导弹高度
-                        speed: 2.5 * 144, // 初段上升速度减少50%（5 * 0.5 = 2.5）（转换为每秒像素，144Hz基准）
-                        angle: -Math.PI / 2, // 初始朝上（垂直发射）
-                        phase: 'rising', // 阶段：rising=上升, tracking=追踪
-                        riseStartTime: Date.now(),
-                        riseDuration: 640, // 锁定时间提前20%（800 * 0.8 = 640）
-                        targetX: null, // 锁定目标位置
-                        targetY: null,
-                        active: true,
-                        damage: 3 // Boss导弹-3点生命值
-                    });
+                    const obj = ObjectPool.get('bossMissiles', {});
+                    obj.x = posX;
+                    obj.y = boss.y + boss.height / 2;
+                    obj.width = 107; // Boss导弹宽度
+                    obj.height = 33; // Boss导弹高度
+                    obj.speed = 2.5 * 144; // 初段上升速度减少50%（5 * 0.5 = 2.5）（转换为每秒像素，144Hz基准）
+                    obj.angle = -Math.PI / 2; // 初始朝上（垂直发射）
+                    obj.phase = 'rising'; // 阶段：rising=上升, tracking=追踪
+                    obj.riseStartTime = Date.now();
+                    obj.riseDuration = 640; // 锁定时间提前20%（800 * 0.8 = 640）
+                    obj.targetX = null; // 锁定目标位置
+                    obj.targetY = null;
+                    obj.active = true;
+                    obj.damage = 3; // Boss导弹-3点生命值
+                    bossMissiles.push(obj);
                 }, index * 200); // 每枚延迟0.2s
             });
         }
@@ -3908,6 +3908,7 @@
                         hpAnimation.toHp = hp;
                         
                         triggerDamageFlash();
+                        ObjectPool.release('bossBullets', bossBullets[i]);
                         bossBullets.splice(i, 1);
 
                         if (hp <= 0 && !playerDefeatState.active) {
@@ -3921,6 +3922,7 @@
 
                     // 移除超出屏幕的子弹
                     if (bullet.y < -20) {
+                        ObjectPool.release('bossBullets', bossBullets[i]);
                         bossBullets.splice(i, 1);
                     }
                 }
@@ -3997,6 +3999,7 @@
                     hpAnimation.toHp = hp;
                     
                     triggerDamageFlash();
+                    ObjectPool.release('bossMissiles', bossMissiles[i]);
                     bossMissiles.splice(i, 1);
 
                     if (hp <= 0 && !playerDefeatState.active) {
@@ -4011,6 +4014,7 @@
                 // 移除超出屏幕的导弹
                 if (missile.x < -50 || missile.x > canvas.width + 50 ||
                     missile.y < -50 || missile.y > canvas.height + 50) {
+                    ObjectPool.release('bossMissiles', bossMissiles[i]);
                     bossMissiles.splice(i, 1);
                 }
             }
@@ -4576,7 +4580,7 @@
 
             if (spriteData && sprite.complete && sprite.naturalWidth > 0) {
                 // 使用精灵图渲染
-                const frames = Object.keys(spriteData.frames);
+                const frames = getCachedSpriteFrames('missileTail', spriteData);
                 const tailElapsed = Date.now() - missile.riseStartTime;
                 const tailFrameIndex = Math.floor((tailElapsed / 50) % frames.length);
                 const frameName = frames[tailFrameIndex];
@@ -4604,9 +4608,10 @@
                         window.tailDrawDebugLogged = true;
                     }
 
+                    const cachedCanvas = getCachedFrameCanvas(sprite, 'missileTail', frameName, frameData);
                     ctx.drawImage(
-                        sprite,
-                        frame.x, frame.y, frame.w, frame.h,
+                        cachedCanvas,
+                        0, 0, frame.w, frame.h,
                         -tailWidth/2, tailY, tailWidth, tailHeight
                     );
                     ctx.restore();
@@ -4658,7 +4663,7 @@
 
             if (spriteData && sprite.complete && sprite.naturalWidth > 0) {
                 // 根据激光持续时间计算当前帧
-                const frames = Object.keys(spriteData.frames);
+                const frames = getCachedSpriteFrames('bossLaser', spriteData);
                 const frameIndex = Math.min(
                     Math.floor((laserElapsed / boss.laserDuration) * frames.length),
                     frames.length - 1
@@ -4679,9 +4684,10 @@
                     ctx.save();
                     ctx.translate(bossCenterX, bossCenterY);
                     ctx.rotate(Math.PI);
+                    const cachedCanvas = getCachedFrameCanvas(sprite, 'bossLaser', frameName, frameData);
                     ctx.drawImage(
-                        sprite,
-                        frame.x, frame.y, frame.w, frame.h,
+                        cachedCanvas,
+                        0, 0, frame.w, frame.h,
                         -targetWidth / 2, 0, targetWidth, targetHeight
                     );
                     ctx.restore();
@@ -5066,17 +5072,17 @@
         function fireMissile(sub) {
             // 导弹先斜向发射，然后转为垂直
             const direction = Math.random() > 0.5 ? 1 : -1;
-            missiles.push({
-                x: sub.x + sub.width / 2,
-                y: sub.y,
-                width: 20, // 素材旋转90度后的宽度
-                height: 104, // 素材旋转90度后的高度
-                phase: 'diagonal', // diagonal, vertical
-                direction: direction,
-                startY: sub.y,
-                targetHeight: sub.y - 150,
-                startTime: Date.now() // 导弹发射时间，用于尾焰动画
-            });
+            const obj = ObjectPool.get('missiles', {});
+            obj.x = sub.x + sub.width / 2;
+            obj.y = sub.y;
+            obj.width = 20; // 素材旋转90度后的宽度
+            obj.height = 104; // 素材旋转90度后的高度
+            obj.phase = 'diagonal'; // diagonal, vertical
+            obj.direction = direction;
+            obj.startY = sub.y;
+            obj.targetHeight = sub.y - 150;
+            obj.startTime = Date.now(); // 导弹发射时间，用于尾焰动画
+            missiles.push(obj);
             
             // 创建导弹发射气泡特效
             // 位置在潜艇驾驶室右侧（潜艇上方偏右）
@@ -5160,6 +5166,7 @@
 
                 // 延迟移除导弹，让尾焰有足够时间显示（从-50改为-200）
                 if (missile.y < -200) {
+                    ObjectPool.release('missiles', missiles[i]);
                     missiles.splice(i, 1);
                 }
             }
@@ -5169,14 +5176,14 @@
         function createWaterSplash(x, y) {
             // 根据当前场景决定使用哪种浪花特效
             const isNightOrBoss = isNightScene || boss.active || bossDefeatState.showBubble;
-            waterSplashes.push({
-                x: x,
-                y: y,
-                startTime: Date.now(),
-                duration: 700, // 0.7秒播放完（加快30%）
-                frameIndex: 0,
-                isNight: isNightOrBoss // 记录创建时的场景类型
-            });
+            const obj = ObjectPool.get('waterSplashes', {});
+            obj.x = x;
+            obj.y = y;
+            obj.startTime = Date.now();
+            obj.duration = 700; // 0.7秒播放完（加快30%）
+            obj.frameIndex = 0;
+            obj.isNight = isNightOrBoss; // 记录创建时的场景类型
+            waterSplashes.push(obj);
             
             // 播放浪花音效（完全隔离，防止影响游戏逻辑）
             setTimeout(() => {
@@ -5235,6 +5242,7 @@
                 
                 // 播放1次后结束
                 if (elapsed >= splash.duration) {
+                    ObjectPool.release('waterSplashes', waterSplashes[i]);
                     waterSplashes.splice(i, 1);
                 }
             }
@@ -5245,8 +5253,9 @@
             waterSplashes.forEach(splash => {
                 // 使用水花创建时记录的场景类型来选择对应的精灵图数据
                 const spriteData = splash.isNight ? assets.waterSplashNightSpriteData : assets.waterSplashSpriteData;
+                const spriteDataKey = splash.isNight ? 'waterSplashNight' : 'waterSplash';
                 const sprite = splash.isNight ? assets.waterSplashNightSprite : assets.waterSplashSprite;
-                const frames = getSpriteSheetFrames(spriteData);
+                const frames = getSpriteSheetFrames(spriteDataKey, spriteData);
                 const frameCount = frames.length;
                 if (frameCount === 0 || !sprite || !sprite.complete) return;
 
@@ -5254,13 +5263,15 @@
                 const progress = elapsed / splash.duration;
                 const frameIndex = Math.min(Math.floor(progress * frameCount), frameCount - 1);
 
-                const frame = frames[frameIndex];
+                const frameInfo = frames[frameIndex];
+                const frame = frameInfo ? frameInfo.frame : null;
                 if (frame) {
                     // 应用缩放（默认为1，Boss子弹为0.2）
                     const scale = splash.scale || 1;
                     const width = frame.w * scale;
                     const height = frame.h * scale;
-                    ctx.drawImage(sprite, frame.x, frame.y, frame.w, frame.h, splash.x - width / 2, splash.y - height / 2, width, height);
+                    const cachedCanvas = getCachedFrameCanvas(sprite, spriteDataKey, frameInfo.name, frameInfo.data);
+                    ctx.drawImage(cachedCanvas, 0, 0, frame.w, frame.h, splash.x - width / 2, splash.y - height / 2, width, height);
                 }
             });
         }
@@ -5272,6 +5283,7 @@
                 const animationDuration = exp.animationDuration || 500;
                 
                 if (Date.now() - exp.startTime > animationDuration) {
+                    ObjectPool.release('explosions', explosions[i]);
                     explosions.splice(i, 1);
                 }
             }
@@ -5648,7 +5660,7 @@
                 ctx.globalAlpha = alpha;
                 
                 // 绘制超级武器动态皮肤（使用精灵图）
-                const frames = getSpriteSheetFrames(assets.superWeaponSpriteData);
+                const frames = getSpriteSheetFrames('superWeapon', assets.superWeaponSpriteData);
                 const sprite = assets.superWeaponSprite;
                 if (frames.length > 0 && sprite && sprite.complete && sprite.naturalWidth > 0) {
                     // 根据进度计算当前帧索引
@@ -5656,13 +5668,14 @@
                         Math.floor(progress * frames.length),
                         frames.length - 1
                     );
-                    const frame = frames[frameIndex];
+                    const frameInfo = frames[frameIndex];
+                    const frame = frameInfo.frame;
                     const imgWidth = frame.w;
                     const imgHeight = frame.h;
                     
                     const scaleX = canvas.width / imgWidth;
-                    const scaledWidth = imgWidth * scaleX;
                     const scaledHeight = imgHeight * scaleX;
+                    const scaledWidth = imgWidth * scaleX;
                     
                     // 计算基础位置（居中）
                     const centerX = (canvas.width - scaledWidth) / 2;
@@ -5679,7 +5692,8 @@
                     const drawY = centerY + offsetY;
                     
                     // 从精灵图绘制当前帧
-                    ctx.drawImage(sprite, frame.x, frame.y, frame.w, frame.h, drawX, drawY, scaledWidth, scaledHeight);
+                    const cachedCanvas = getCachedFrameCanvas(sprite, 'superWeapon', frameInfo.name, frameInfo.data);
+                    ctx.drawImage(cachedCanvas, 0, 0, frame.w, frame.h, drawX, drawY, scaledWidth, scaledHeight);
                 } else if (assets.superWeaponBg.complete && assets.superWeaponBg.naturalWidth > 0) {
                     // 备用：使用静态图片
                     const bgImg = assets.superWeaponBg;
@@ -6064,7 +6078,7 @@
 
         // 绘制导弹发射气泡特效（在潜艇下方）
         function drawMissileLaunchBubbles() {
-            const frames = getSpriteSheetFrames(assets.missileBubbleSpriteData);
+            const frames = getSpriteSheetFrames('missileBubble', assets.missileBubbleSpriteData);
             const sprite = assets.missileBubbleSprite;
             if (frames.length === 0 || !sprite || !sprite.complete) return;
             
@@ -6078,12 +6092,14 @@
                     frames.length - 1
                 );
                 
-                const frame = frames[frameIndex];
+                const frameInfo = frames[frameIndex];
+                const frame = frameInfo.frame;
                 if (frame) {
                     // 气泡大小 105*74
                     const width = 105;
                     const height = 74;
-                    ctx.drawImage(sprite, frame.x, frame.y, frame.w, frame.h, bubble.x - width/2, bubble.y - height/2, width, height);
+                    const cachedCanvas = getCachedFrameCanvas(sprite, 'missileBubble', frameInfo.name, frameInfo.data);
+                    ctx.drawImage(cachedCanvas, 0, 0, frame.w, frame.h, bubble.x - width/2, bubble.y - height/2, width, height);
                 }
             });
         }
@@ -6263,7 +6279,7 @@
 
             // 优先使用精灵图
             if (spriteData && sprite.complete && sprite.naturalWidth > 0) {
-                const frames = Object.keys(spriteData.frames);
+                const frames = getCachedSpriteFrames('missileTail', spriteData);
                 const tailElapsed = Date.now() - missile.startTime;
                 const tailFrameIndex = Math.floor((tailElapsed / 50) % frames.length);
                 const frameName = frames[tailFrameIndex];
@@ -6283,9 +6299,10 @@
                     const tailY = missile.height/2 + 0;
                     const tailX = -tailWidth/2 - 4; // 向左移动4像素
 
+                    const cachedCanvas = getCachedFrameCanvas(sprite, 'missileTail', frameName, frameData);
                     ctx.drawImage(
-                        sprite,
-                        frame.x, frame.y, frame.w, frame.h,
+                        cachedCanvas,
+                        0, 0, frame.w, frame.h,
                         tailX, tailY, tailWidth, tailHeight
                     );
                     ctx.restore();
@@ -6310,10 +6327,8 @@
 
         // 绘制爆炸效果（不包括击中玩家的爆炸）
         // 从精灵图数据获取帧数组（按文件名排序）
-        function getSpriteSheetFrames(spriteData) {
-            if (!spriteData || !spriteData.frames) return [];
-            const frameNames = Object.keys(spriteData.frames).sort();
-            return frameNames.map(name => spriteData.frames[name].frame);
+        function getSpriteSheetFrames(spriteDataKey, spriteData) {
+            return getCachedSpriteFrameDataArray(spriteDataKey, spriteData);
         }
 
         function drawExplosions() {
@@ -6322,7 +6337,7 @@
                 if (exp.isPlayerHit) return;
                 
                 const elapsed = Date.now() - exp.startTime;
-                const frames = getSpriteSheetFrames(assets.explosionSpriteData);
+                const frames = getSpriteSheetFrames('explosion', assets.explosionSpriteData);
                 const frameCount = frames.length;
                 // 使用每个爆炸自己的动画时长（稀有潜艇750ms，普通500ms）
                 const animationDuration = exp.animationDuration || 500;
@@ -6359,12 +6374,14 @@
                 ctx.restore();
                 
                 // 从精灵图绘制当前帧
-                const frame = frames[frameIndex];
+                const frameInfo = frames[frameIndex];
+                const frame = frameInfo ? frameInfo.frame : null;
                 const sprite = assets.explosionSprite;
                 
                 if (frame && sprite && sprite.complete && sprite.naturalWidth > 0) {
                     const size = 195; // 爆炸显示大小（150 * 1.3 = 195）
-                    ctx.drawImage(sprite, frame.x, frame.y, frame.w, frame.h, exp.x - size/2, exp.y - size/2, size, size);
+                    const cachedCanvas = getCachedFrameCanvas(sprite, 'explosion', frameInfo.name, frameInfo.data);
+                    ctx.drawImage(cachedCanvas, 0, 0, frame.w, frame.h, exp.x - size/2, exp.y - size/2, size, size);
                 } else {
                     // 备用绘制
                     const size = baseSize * expansion;
@@ -6406,7 +6423,7 @@
                 if (!exp.isPlayerHit) return;
                 
                 const elapsed = Date.now() - exp.startTime;
-                const frames = getSpriteSheetFrames(assets.explosionSpriteData);
+                const frames = getSpriteSheetFrames('explosion', assets.explosionSpriteData);
                 const frameCount = frames.length;
                 // 使用每个爆炸自己的动画时长（稀有潜艇750ms，普通500ms）
                 const animationDuration = exp.animationDuration || 500;
@@ -6443,12 +6460,14 @@
                 ctx.restore();
                 
                 // 从精灵图绘制当前帧
-                const frame = frames[frameIndex];
+                const frameInfo = frames[frameIndex];
+                const frame = frameInfo ? frameInfo.frame : null;
                 const sprite = assets.explosionSprite;
                 
                 if (frame && sprite && sprite.complete && sprite.naturalWidth > 0) {
                     const size = 195; // 爆炸显示大小（150 * 1.3 = 195）
-                    ctx.drawImage(sprite, frame.x, frame.y, frame.w, frame.h, exp.x - size/2, exp.y - size/2, size, size);
+                    const cachedCanvas = getCachedFrameCanvas(sprite, 'explosion', frameInfo.name, frameInfo.data);
+                    ctx.drawImage(cachedCanvas, 0, 0, frame.w, frame.h, exp.x - size/2, exp.y - size/2, size, size);
                 } else {
                     // 备用绘制
                     const size = baseSize * expansion;
@@ -6780,6 +6799,74 @@
             
         }
 
+        // 缓存精灵图的帧名数组，避免每帧调用 Object.keys
+        const spriteFramesCache = {};
+        // 缓存精灵图帧数据的数组，避免每帧 map
+        const spriteFrameDataArrayCache = {};
+        // 缓存精灵图帧的离屏 Canvas
+        const spriteCanvasCache = {};
+        
+        function getCachedSpriteFrames(spriteDataKey, spriteData) {
+            if (!spriteData || !spriteData.frames) return [];
+            if (!spriteFramesCache[spriteDataKey]) {
+                spriteFramesCache[spriteDataKey] = Object.keys(spriteData.frames).sort();
+            }
+            return spriteFramesCache[spriteDataKey];
+        }
+
+        function getCachedSpriteFrameDataArray(spriteDataKey, spriteData) {
+            if (!spriteData || !spriteData.frames) return [];
+            if (!spriteFrameDataArrayCache[spriteDataKey]) {
+                const names = getCachedSpriteFrames(spriteDataKey, spriteData);
+                spriteFrameDataArrayCache[spriteDataKey] = names.map(name => {
+                    return {
+                        name: name,
+                        data: spriteData.frames[name],
+                        frame: spriteData.frames[name].frame
+                    };
+                });
+            }
+            return spriteFrameDataArrayCache[spriteDataKey];
+        }
+
+        // 预渲染并获取帧的离屏 Canvas
+        function getCachedFrameCanvas(sprite, spriteDataKey, frameName, frameData) {
+            if (!spriteCanvasCache[spriteDataKey]) {
+                spriteCanvasCache[spriteDataKey] = {};
+            }
+            if (!spriteCanvasCache[spriteDataKey][frameName]) {
+                const offscreen = document.createElement('canvas');
+                offscreen.width = frameData.frame.w;
+                offscreen.height = frameData.frame.h;
+                const offCtx = offscreen.getContext('2d');
+                offCtx.drawImage(
+                    sprite,
+                    frameData.frame.x, frameData.frame.y, frameData.frame.w, frameData.frame.h,
+                    0, 0, frameData.frame.w, frameData.frame.h
+                );
+                spriteCanvasCache[spriteDataKey][frameName] = offscreen;
+            }
+            return spriteCanvasCache[spriteDataKey][frameName];
+        }
+
+        // ==================== 对象池 ====================
+        const ObjectPool = {
+            explosions: [],
+            waterSplashes: [],
+            missiles: [],
+            bossMissiles: [],
+            bossBullets: [],
+            get: function(pool, defaultObj) {
+                if (this[pool].length > 0) {
+                    return this[pool].pop();
+                }
+                return defaultObj;
+            },
+            release: function(pool, obj) {
+                this[pool].push(obj);
+            }
+        };
+
         // ==================== 碰撞检测 ====================
         function checkCollisions() {
             // 水雷 vs 潜艇
@@ -6835,6 +6922,7 @@
                 
                 if (checkCollision(missile, player)) {
                     createExplosion(player.x + player.width/2, player.y + player.height/2, true);
+                    ObjectPool.release('missiles', missiles[mIndex]);
                     missiles.splice(mIndex, 1);
 
                     // 检查护盾效果
@@ -6954,15 +7042,16 @@
 
         function createExplosion(x, y, isPlayerHit = false, scoreValue = null) {
             const isGoldSub = scoreValue === 100;
-            explosions.push({
-                x: x,
-                y: y,
-                startTime: Date.now(),
-                isPlayerHit: isPlayerHit, // 标记是否为击中玩家的爆炸
-                scoreValue: scoreValue, // 本次攻击得到的分数（可选）
-                isGoldSub: isGoldSub, // 是否是稀有潜艇（用于延长显示时间）
-                animationDuration: isGoldSub ? 750 : 500 // 稀有潜艇动画时长+50%（750ms vs 500ms）
-            });
+            const obj = ObjectPool.get('explosions', {});
+            obj.x = x;
+            obj.y = y;
+            obj.startTime = Date.now();
+            obj.isPlayerHit = isPlayerHit;
+            obj.scoreValue = scoreValue;
+            obj.isGoldSub = isGoldSub;
+            obj.animationDuration = isGoldSub ? 750 : 500;
+            
+            explosions.push(obj);
             
             // 播放爆炸音效（完全隔离，防止影响游戏逻辑）
             setTimeout(() => {
